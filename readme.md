@@ -32,7 +32,14 @@
 ```
 
 ---
-
+### Suspected Target Domains
+- https://gov.hr/en
+- https://nias.gov.hr/en 
+- https://e-porezna.porezna-uprava.hr
+- https://www.hzzo.hr
+- https://ocjene.skole.hr
+- https://www.evisitor.hr/eVisitor/en-US
+---
 ### TASK-1
 - Curl the domain, get the javascript: https://x509ghost.github.io/x509ghost-drop/declassified/flash.html
 - Turn on developer console in browser, execute:
@@ -63,7 +70,37 @@ iVBORw0KGgoAAAANSUhEUgAAAewAAAHsAQAAAAA4UaPNAAADCUlEQVR4nO2dXY7bMAyEh0XfpRvk/sfK
     "args": [false] }
 ]
 ```
+Solved
+`GHOSTTASK1{fl1ck3r_s33s_4ll}`
 
 ---
 ### TASK-2
 
+- Flip image vertically
+- Transcribe the message
+```txt
+-+--+-+-----++-----+-++-----+-+-+-+-+-+-+---++---+--+-+-+-+-+-+-+---+-+--++-+-+--+++--+---++--+-+-++--+--+++-++---+-+++---+-+++-+-++--+----++-+--+-+--+-+--++++-+-++--+----+--+--+-+--+--++--++--+---++---+-+-+--++---+-+--++++-++---++--+-+-++--+----+-+--++++----++-+-++--++--+-++--+--+-++++-+-++--+-++--++---+++--+--++--++--+++--+-+++---+----++++-++--+++--++--++-+---+-+-+-++++--+-++++--
+```
+- Use the following recipe to convert +&-'s to binary, reverse (twice) & then convert from binary to base64
+
+```json
+[
+  { "op": "Find / Replace",
+    "args": [{ "option": "Simple string", "string": "-" }, "0", true, false, true, false] },
+  { "op": "Find / Replace",
+    "args": [{ "option": "Simple string", "string": "+" }, "1", true, false, true, false] },
+  { "op": "Reverse",
+    "args": ["Character"] },
+  { "op": "From Binary",
+    "args": ["None", 8] },
+  { "op": "Reverse",
+    "args": ["Character"] },
+  { "op": "From Base64",
+    "args": ["A-Za-z0-9+/=", true, false] }
+]
+```
+Solved:
+`GHOSTTASK2{m1rr0r_m1rr0r_s33s_4ll}`
+
+---
+### TASK-3
