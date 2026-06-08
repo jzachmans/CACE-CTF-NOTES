@@ -70,7 +70,7 @@ iVBORw0KGgoAAAANSUhEUgAAAewAAAHsAQAAAAA4UaPNAAADCUlEQVR4nO2dXY7bMAyEh0XfpRvk/sfK
     "args": [false] }
 ]
 ```
-Solved
+Solved:
 `GHOSTTASK1{fl1ck3r_s33s_4ll}`
 
 ---
@@ -104,3 +104,35 @@ Solved:
 
 ---
 ### TASK-3
+
+- Identify the EXE type, cat the file for strings, found `PyInstaller` artifacts that tell us this is a Python compiled EXE
+- Unpackage the ghost.exe using `pyinstxtractor`, which lists a possible entrypoint: `[+] Possible entry point: ghost.pyc`
+- Use `dis` to decomplile ghost.pyc to bytecode then review the output
+- In the bytecode, a function called `_reveal` was discovered
+- Again, use `dis` to run the `_reveal` function which shares the flag
+
+
+```python
+import marshal, dis
+
+with open("ghost.pyc", "rb") as f:
+    f.read(16)
+    code = marshal.loads(f.read())
+
+blob_bytes = None
+for const in code.co_consts:
+    if isinstance(const, tuple) and len(const) > 100:
+        blob_bytes = bytes(const)
+        break
+
+ns = {}
+exec(marshal.loads(blob_bytes), ns)
+
+dis.dis(ns['_reveal'])
+```
+Solved:
+`GHOSTTASK3{y0u_p33l3d_th3_l4y3rs}`
+
+---
+
+### TASK-4
