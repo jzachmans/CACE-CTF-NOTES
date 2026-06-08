@@ -107,7 +107,7 @@ Solved:
 
 - Identify the EXE type, cat the file for strings, found `PyInstaller` artifacts that tell us this is a Python compiled EXE
 - Unpackage the ghost.exe using `pyinstxtractor`, which lists a possible entrypoint: `[+] Possible entry point: ghost.pyc`
-- Use `dis` to decomplile ghost.pyc to bytecode then review the output
+- Use `dis` to decompile ghost.pyc to bytecode then review the output
 - In the bytecode, a function called `_reveal` was discovered
 - Again, use `dis` to run the `_reveal` function which shares the flag
 
@@ -136,3 +136,27 @@ Solved:
 ---
 
 ### TASK-4
+
+- Review pcap for patterns, found interesting HTTP comm here `ip.addr==192.168.1.105 && ip.addr==10.10.10.42`
+- Found base64 encoded data chopped up & contained inside the `X-TOKEN-SESSION` header 
+```txt
+X-Session-Token: fW4wMXNz
+X-Session-Token: MW1zbmFy
+X-Session-Token: dF90bjNs
+X-Session-Token: MXN7NEtT
+X-Session-Token: QVRUU09I
+X-Session-Token: Rw==
+```
+- Concat & decode using this recipe
+
+```json
+[
+  { "op": "From Base64",
+    "args": ["A-Za-z0-9+/=", true, false] },
+  { "op": "Reverse",
+    "args": ["Character"] }
+]
+```
+
+Solved:
+`GHOSTTASK4{s1l3nt_transm1ss10n}`
