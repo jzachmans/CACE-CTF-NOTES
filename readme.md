@@ -160,3 +160,65 @@ X-Session-Token: Rw==
 
 Solved:
 `GHOSTTASK4{s1l3nt_transm1ss10n}`
+
+---
+### TASK-5
+
+- We know from the prompt that something is hidden in the JPG
+- Download the JPG and open with 7zip to locate and extract a hidden .zip
+- The picture is a clue to walk around and locate hidden QR codes
+- XOR the QR codes using the TASK-4 flag
+- List of encoded and clear-text codes below
+
+| Item | Encoded String | UN-XOR'd String |
+|------|----------------|-----------------|
+| Window | Peebx-0; | Zadar, 1 |
+| Monitor | Fqjbgntxmb/*2 | Lukamodric, 3 |
+| Door | Hh`de[qnvn/*4 | BlagoZadro, 5 |
+| Router | Yawfxh~k(!7 | Severina, 4 |
+| Chair | Ikcbd`s&$3 | Cobanac, 2 |
+
+- We know that we need to brute-force the zip password from the prompt
+- Create a wordlist using with the cleartext strings
+```python
+from itertools import permutations
+ 
+names = ['Zadar', 'Lukamodric', 'BlagoZadro', 'Severina', 'Cobanac', '1', '2', '3', '4', '5']
+numbers = []
+all_tokens = names + numbers
+ 
+candidates = set()
+ 
+for r in range(1, 11):
+    for perm in permutations(all_tokens, r):
+        candidates.add(''.join(perm))
+    print(f'r={r} done, total so far: {len(candidates):,}')
+ 
+with open('wordlist.txt', 'w') as f:
+    for c in sorted(candidates):
+        f.write(c + '\n')
+ 
+print(f'Total candidates: {len(candidates):,}')
+```
+
+- Create a hash of the extracted .zip
+*ProTip, use Kali... running John in windows yielded inconsistent results*
+- `zip2john 2.zip > hash.txt`
+- Run John against your wordlist
+```bash
+john hash.txt --wordlist=wordlist.txt
+Using default input encoding: UTF-8
+Loaded 1 password hash (PKZIP [32/64])
+Will run 16 OpenMP threads
+Press 'q' or Ctrl-C to abort, almost any other key for status
+Warning: Only 1 candidate left, minimum 16 needed for performance.
+Zadar1BlagoZadroLukaModricSeverina3254Cobanac (2.zip/flag.txt)
+1g 0:00:00:00 DONE (2026-06-10 02:05) 25.00g/s 25.00p/s 25.00c/s 25.00C/s Zadar1BlagoZadroLukaModricSeverina3254Cobanac
+Use the "--show" option to display all of the cracked passwords reliably
+Session completed.
+```
+- Use this password to open the .zip `Zadar1BlagoZadroLukaModricSeverina3254Cobanac`
+- Obtain the flag
+
+Solved:
+`GHOSTTASK5{Zadar_w4s_just_the_b3g1nn1ng}`
