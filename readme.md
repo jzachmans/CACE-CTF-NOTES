@@ -173,7 +173,7 @@ Solved:
 | Item | Encoded String | UN-XOR'd String |
 |------|----------------|-----------------|
 | Window | Peebx-0; | Zadar, 1 |
-| Monitor | Fqjbgntxmb/*2 | Lukamodric, 3 |
+| Monitor | Fqjbgntxmb/*2 | LukaModric, 3 |
 | Door | Hh`de[qnvn/*4 | BlagoZadro, 5 |
 | Router | Yawfxh~k(!7 | Severina, 4 |
 | Chair | Ikcbd`s&$3 | Cobanac, 2 |
@@ -183,7 +183,7 @@ Solved:
 ```python
 from itertools import permutations
  
-names = ['Zadar', 'Lukamodric', 'BlagoZadro', 'Severina', 'Cobanac', '1', '2', '3', '4', '5']
+names = ['Zadar', 'LukaModric', 'BlagoZadro', 'Severina', 'Cobanac', '1', '2', '3', '4', '5']
 numbers = []
 all_tokens = names + numbers
  
@@ -194,7 +194,7 @@ for r in range(1, 11):
         candidates.add(''.join(perm))
     print(f'r={r} done, total so far: {len(candidates):,}')
  
-with open('wordlist.txt', 'w') as f:
+with open('wordlist9.txt', 'w') as f:
     for c in sorted(candidates):
         f.write(c + '\n')
  
@@ -203,17 +203,16 @@ print(f'Total candidates: {len(candidates):,}')
 
 - Create a hash of the extracted .zip
 *ProTip, use Kali... running John in windows yielded inconsistent results*
-- `zip2john 2.zip > hash.txt`
+- `john-the-ripper --wordlist=wordlist9.txt hash3.txt`
 - Run John against your wordlist
 ```bash
-john hash.txt --wordlist=wordlist.txt
 Using default input encoding: UTF-8
 Loaded 1 password hash (PKZIP [32/64])
 Will run 16 OpenMP threads
-Press 'q' or Ctrl-C to abort, almost any other key for status
-Warning: Only 1 candidate left, minimum 16 needed for performance.
-Zadar1BlagoZadroLukaModricSeverina3254Cobanac (2.zip/flag.txt)
-1g 0:00:00:00 DONE (2026-06-10 02:05) 25.00g/s 25.00p/s 25.00c/s 25.00C/s Zadar1BlagoZadroLukaModricSeverina3254Cobanac
+Note: Passwords longer than 21 [worst case UTF-8] to 63 [ASCII] rejected
+Press 'q' or Ctrl-C to abort, 'h' for help, almost any other key for status
+Zadar1BlagoZadroLukaModricSeverina3254Cobanac (2.zip/flag.txt)     
+1g 0:00:00:02 DONE (2026-06-11 03:12) 0.3891g/s 3480Kp/s 3480Kc/s 3480KC/s Zadar14BlagoZadroSeverinaLukaModric532..Zadar1BlagoZadroSeverinaCobanac3LukaModric425
 Use the "--show" option to display all of the cracked passwords reliably
 Session completed.
 ```
